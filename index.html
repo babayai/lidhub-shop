@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lidhub Beauty Lab</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            text-align: center;
+            padding: 20px;
+        }
+        .product-card {
+            border: 1px solid #d4af37;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #d4af37;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lidhub Beauty Lab</h1>
+    <div class="product-card">
+        <img src="https://img.fragrancex.com/images/products/parent/medium/60303m.jpg" alt="GIO" style="width:150px;">
+        <h2>Acqua di Giò</h2>
+        <p>Лучший мужской парфюм от Giorgio Armani</p>
+        <p><strong>Цена: 100$</strong></p>
+        <button id="buy-btn">Купить сейчас</button>
+    </div>
+
+    <script>
+        // Сообщаем Telegram, что приложение готово
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+
+        document.getElementById("buy-btn").addEventListener("click", () => {
+            tg.sendData("order_gio_armani"); // Отправляем сигнал боту о покупке
+        });
+    </script>
+</body>
+</html>
