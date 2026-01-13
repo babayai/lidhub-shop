@@ -1,79 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lidhub Premium Store</title>
+    <title>Lidhub Cloud Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: white; margin: 0; padding: 15px; }
-        .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #333; }
-        .category-nav { display: flex; gap: 10px; overflow-x: auto; margin: 20px 0; padding-bottom: 10px; }
-        .cat-btn { background: #222; color: #ccc; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; white-space: nowrap; }
-        .cat-btn.active { background: #007aff; color: white; border: none; }
-        
-        .products { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .product-card { background: #1a1a1a; padding: 12px; border-radius: 15px; border: 1px solid #333; }
-        .product-card img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
-        .product-card h3 { font-size: 0.85em; margin: 5px 0; height: 35px; overflow: hidden; }
-        .product-card .price { color: #007aff; font-weight: bold; font-size: 1.1em; }
-        
-        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 10px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
-        
-        #cart-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #007aff; color: white; padding: 15px; border-radius: 15px; text-align: center; display: none; font-weight: bold; box-shadow: 0 5px 15px rgba(0,122,255,0.4); }
+        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 400px; width: 100%; }
+        .product-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .product-img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+        .product-name { font-size: 18px; font-weight: bold; margin: 10px 0; }
+        .product-price { color: #0088cc; font-size: 16px; margin-bottom: 10px; }
+        .btn { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .cart-status { position: fixed; bottom: 20px; width: calc(100% - 30px); max-width: 370px; background: #31b545; color: white; padding: 15px; border-radius: 12px; text-align: center; display: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2 style="margin:0;">Lidhub Retail OS</h2>
-        <p style="font-size: 0.8em; color: #888;">Premium Fragrance Selection</p>
-    </div>
 
-    <div class="category-nav">
-        <div class="cat-btn active">Все</div>
-        <div class="cat-btn">Мужские</div>
-        <div class="cat-btn">Женские</div>
-        <div class="cat-btn">Унисекс</div>
-    </div>
+<div class="container" id="shop-container">
+    <p style="text-align: center;">Загрузка витрины Lidhub...</p>
+</div>
 
-    <div class="products">
-        <div class="product-card">
-            <img src="https://img.fragrancex.com/images/products/parent/medium/60541m.jpg">
-            <h3>Armani GIO Profumo</h3>
-            <div class="price">105</div>
-            <button class="add-btn" onclick="addToCart('Armani GIO', 105)">В корзину</button>
-        </div>
-        <div class="product-card">
-            <img src="https://img.fragrancex.com/images/products/parent/medium/1138m.jpg">
-            <h3>Dior Sauvage EDP</h3>
-            <div class="price">125</div>
-            <button class="add-btn" onclick="addToCart('Sauvage', 125)">В корзину</button>
-        </div>
-    </div>
+<div class="cart-status" id="cart-btn" onclick="sendData()">
+    Оформить заказ: <span id="total-price">0</span> UZS
+</div>
 
-    <div id="cart-bar" onclick="sendToBot()">🛍 Оформить заказ: UZS<span id="total-price">0</span></div>
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.MainButton.hide();
+    let cart = [];
+    let totalPrice = 0;
 
-        let cart = [];
-        let total = 0;
+    // Ссылка на твою опубликованную таблицу в формате CSV для легкого чтения
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTN5uMA3s-VGFwwN_PW0gFgn_hB_RQPjnzDosEC1FIhYvYedLVmNyRjJ8yVrtZU_ODqEY2ccp36xp4a/pub?output=csv";
 
-        function addToCart(name, price) {
-            cart.push({name, price});
-            total += price;
-            document.getElementById('cart-bar').style.display = 'block';
-            document.getElementById('total-price').innerText = total;
-            tg.HapticFeedback.impactOccurred('heavy');
+    async function loadProducts() {
+        try {
+            const response = await fetch(sheetUrl);
+            const data = await response.text();
+            const rows = data.split('\n').slice(1); // Пропускаем заголовок
+            
+            const container = document.getElementById('shop-container');
+            container.innerHTML = ''; // Очищаем текст загрузки
+
+            rows.forEach(row => {
+                const cols = row.split(',');
+                if (cols.length >= 5) {
+                    const product = {
+                        id: cols[0],
+                        name: cols[2],
+                        price: parseInt(cols[4]),
+                        img: cols[5]
+                    };
+
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <img src="${product.img}" class="product-img">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">${product.price.toLocaleString()} UZS</div>
+                        <button class="btn" onclick="addToCart('${product.name}', ${product.price})">Добавить</button>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        } catch (e) {
+            console.error("Ошибка загрузки товаров:", e);
         }
+    }
 
-        function sendToBot() {
-            if (cart.length === 0) return;
-            tg.sendData(JSON.stringify({items: cart, total: total}));
-        }
-    </script>
+    function addToCart(name, price) {
+        cart.push({name, price});
+        totalPrice += price;
+        document.getElementById('total-price').innerText = totalPrice.toLocaleString();
+        document.getElementById('cart-btn').style.display = 'block';
+    }
+
+    function sendData() {
+        const data = {
+            items: cart,
+            total: totalPrice
+        };
+        tg.sendData(JSON.stringify(data));
+        tg.close();
+    }
+
+    loadProducts();
+</script>
 </body>
 </html>
-
