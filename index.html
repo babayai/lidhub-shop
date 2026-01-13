@@ -3,72 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lidhub Digital Store</title>
+    <title>Lidhub Premium Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 15px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .category-title { font-size: 1.2em; font-weight: bold; margin: 15px 0; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: white; margin: 0; padding: 15px; }
+        .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #333; }
+        .category-nav { display: flex; gap: 10px; overflow-x: auto; margin: 20px 0; padding-bottom: 10px; }
+        .cat-btn { background: #222; color: #ccc; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; white-space: nowrap; }
+        .cat-btn.active { background: #007aff; color: white; border: none; }
         
-        /* Сетка товаров */
         .products { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .product-card { background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        .product-card img { width: 100%; border-radius: 8px; }
-        .product-card h3 { font-size: 0.9em; margin: 10px 0 5px; }
-        .product-card p { color: #007aff; font-weight: bold; margin: 0; }
+        .product-card { background: #1a1a1a; padding: 12px; border-radius: 15px; border: 1px solid #333; }
+        .product-card img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+        .product-card h3 { font-size: 0.85em; margin: 5px 0; height: 35px; overflow: hidden; }
+        .product-card .price { color: #007aff; font-weight: bold; font-size: 1.1em; }
         
-        /* Кнопка купить */
-        .add-btn { background: #007aff; color: white; border: none; padding: 8px 15px; border-radius: 20px; margin-top: 10px; width: 100%; font-weight: bold; }
+        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 10px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
         
-        /* Корзина внизу */
-        #cart-status { position: fixed; bottom: 0; left: 0; right: 0; background: #007aff; color: white; padding: 15px; text-align: center; display: none; font-weight: bold; }
+        #cart-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #007aff; color: white; padding: 15px; border-radius: 15px; text-align: center; display: none; font-weight: bold; box-shadow: 0 5px 15px rgba(0,122,255,0.4); }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>Lidhub Shop</h2>
-        <span id="user-name"></span>
+        <h2 style="margin:0;">Lidhub Retail OS</h2>
+        <p style="font-size: 0.8em; color: #888;">Premium Fragrance Selection</p>
     </div>
 
-    <div class="category-title">Парфюмерия</div>
+    <div class="category-nav">
+        <div class="cat-btn active">Все</div>
+        <div class="cat-btn">Мужские</div>
+        <div class="cat-btn">Женские</div>
+        <div class="cat-btn">Унисекс</div>
+    </div>
+
     <div class="products">
         <div class="product-card">
             <img src="https://img.fragrancex.com/images/products/parent/medium/60541m.jpg">
-            <h3>Armani GIO</h3>
-            <p>$100</p>
-            <button class="add-btn" onclick="addToCart('Armani GIO', 100)">В корзину</button>
+            <h3>Armani GIO Profumo</h3>
+            <div class="price">$105</div>
+            <button class="add-btn" onclick="addToCart('Armani GIO', 105)">В корзину</button>
         </div>
         <div class="product-card">
             <img src="https://img.fragrancex.com/images/products/parent/medium/1138m.jpg">
-            <h3>Sauvage</h3>
-            <p>$120</p>
-            <button class="add-btn" onclick="addToCart('Sauvage', 120)">В корзину</button>
+            <h3>Dior Sauvage EDP</h3>
+            <div class="price">$125</div>
+            <button class="add-btn" onclick="addToCart('Sauvage', 125)">В корзину</button>
         </div>
     </div>
 
-    <div id="cart-status" onclick="sendOrder()">Оформить заказ (<span id="count">0</span>)</div>
+    <div id="cart-bar" onclick="sendToBot()">🛍 Оформить заказ: $<span id="total-price">0</span></div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
-        
+        tg.expand();
+        tg.MainButton.hide();
+
         let cart = [];
         let total = 0;
 
         function addToCart(name, price) {
             cart.push({name, price});
             total += price;
-            document.getElementById('cart-status').style.display = 'block';
-            document.getElementById('count').innerText = cart.length;
-            tg.HapticFeedback.impactOccurred('medium'); // Виброотклик
+            document.getElementById('cart-bar').style.display = 'block';
+            document.getElementById('total-price').innerText = total;
+            tg.HapticFeedback.impactOccurred('heavy');
         }
 
-        function sendOrder() {
-            let orderData = {
-                items: cart,
-                total: total
-            };
-            tg.sendData(JSON.stringify(orderData)); // Отправляем данные в бот
+        function sendToBot() {
+            if (cart.length === 0) return;
+            tg.sendData(JSON.stringify({items: cart, total: total}));
         }
     </script>
 </body>
