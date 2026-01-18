@@ -2,89 +2,233 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lidhub Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lidhub Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 400px; width: 100%; }
-        .product-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        .product-img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; background: #eee; }
-        .product-name { font-size: 18px; font-weight: bold; margin: 10px 0; }
-        .product-price { color: #0088cc; font-size: 16px; margin-bottom: 15px; font-weight: bold; }
-        .btn { background: #0088cc; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px; }
-        .cart-status { position: fixed; bottom: 20px; width: 90%; max-width: 360px; background: #31b545; color: white; padding: 15px; border-radius: 12px; text-align: center; display: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        /* --- СТИЛИ (CSS) --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            padding-bottom: 80px; /* Отступ для кнопки снизу */
+        }
+
+        /* Шапка профиля */
+        .header {
+            padding: 20px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #eee);
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            background-image: url('https://via.placeholder.com/50?text=USER'); /* Заглушка */
+            background-size: cover;
+            background-position: center;
+        }
+        .user-info h3 { margin: 0; font-size: 18px; }
+        .user-info p { margin: 0; font-size: 14px; color: var(--tg-theme-hint-color, #888); }
+
+        /* Сетка товаров */
+        .container { padding: 15px; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Две колонки */
+            gap: 15px;
+        }
+
+        /* Карточка товара */
+        .card {
+            background: var(--tg-theme-bg-color, #fff);
+            border: 1px solid var(--tg-theme-hint-color, #eee);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-img {
+            width: 100%;
+            height: 120px;
+            background-color: #f4f4f4;
+            object-fit: cover;
+        }
+        .card-body { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; line-height: 1.2; }
+        .card-price { font-size: 14px; color: var(--tg-theme-button-color, #3390ec); font-weight: bold; margin-bottom: 8px;}
+        
+        /* Кнопка "Добавить" */
+        .add-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .add-btn:active { opacity: 0.7; }
+
+        /* Счетчик на карточке (красный круг) */
+        .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e53935;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            display: none; /* Скрыт пока нет товаров */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
-<div class="container" id="shop-container">
-    <p style="text-align: center;">Загрузка товаров...</p>
-</div>
+    <div class="header" id="profile-section">
+        <div class="avatar" id="user-avatar"></div>
+        <div class="user-info">
+            <h3 id="user-name">Гость</h3>
+            <p>Статус: Клиент Lidhub</p>
+        </div>
+    </div>
 
-<div class="cart-status" id="cart-btn">
-    Оформить заказ: <span id="total-price">0</span> UZS
-</div>
+    <div class="container">
+        <h2 style="margin-top: 5px; margin-bottom: 15px; font-size: 20px;">🔥 Популярное</h2>
+        <div class="grid" id="product-list">
+            </div>
+    </div>
 
 <script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready(); // Сообщаем Telegram, что приложение готово
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Растянуть на весь экран
 
-    let cart = [];
-    let totalPrice = 0;
+    // --- 1. БАЗА ДАННЫХ ТОВАРОВ ---
+    // В будущем будем брать это из Google Sheets JSON
+    const products = [
+        { id: 1, name: "Вода AquaLid (19л)", price: 15000, img: "https://via.placeholder.com/300x200/3390ec/ffffff?text=Water" },
+        { id: 2, name: "Помпа механическая", price: 45000, img: "https://via.placeholder.com/300x200/2ecc71/ffffff?text=Pump" },
+        { id: 3, name: "Кулер Напольный", price: 1250000, img: "https://via.placeholder.com/300x200/e74c3c/ffffff?text=Cooler" },
+        { id: 4, name: "Стаканчики (100шт)", price: 12000, img: "https://via.placeholder.com/300x200/f1c40f/ffffff?text=Cups" }
+    ];
 
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTN5uMA3s-VGFwwN_PW0gFgn_hB_RQPjnzDosEC1FIhYvYedLVmNyRjJ8yVrtZU_ODqEY2ccp36xp4a/pub?output=csv";
+    let cart = {}; // Храним товары: { id: quantity }
 
-    async function loadProducts() {
-        try {
-            const response = await fetch(sheetUrl + "&t=" + new Date().getTime());
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
-            const container = document.getElementById('shop-container');
-            container.innerHTML = '';
+    // --- 2. ИНИЦИАЛИЗАЦИЯ ---
+    function initApp() {
+        // Настраиваем профиль
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('user-name').innerText = `${user.first_name} ${user.last_name || ''}`;
+            
+            // Пытаемся получить фото (не всегда доступно из-за приватности)
+            if (user.photo_url) {
+                document.getElementById('user-avatar').style.backgroundImage = `url('${user.photo_url}')`;
+            }
+        }
+        
+        // Цвета темы
+        document.body.style.backgroundColor = tg.themeParams.bg_color || '#fff';
+        
+        renderProducts();
+        
+        // Настройка главной кнопки (MainButton)
+        tg.MainButton.textColor = "#ffffff";
+        tg.MainButton.color = "#2ecc71"; // Зеленый цвет кнопки покупки
+    }
 
-            rows.forEach(row => {
-                const cols = row.split(',');
-                if (cols.length >= 5) {
-                    const name = cols[2].replace(/"/g, "").trim();
-                    const price = parseInt(cols[4]);
-                    const img = cols[5].replace(/"/g, "").replace(/\r/g, "").trim();
+    // --- 3. ОТРИСОВКА ТОВАРОВ ---
+    function renderProducts() {
+        const list = document.getElementById('product-list');
+        list.innerHTML = products.map(p => `
+            <div class="card">
+                <div class="badge" id="badge-${p.id}">0</div>
+                <img src="${p.img}" class="card-img" alt="${p.name}">
+                <div class="card-body">
+                    <div>
+                        <div class="card-title">${p.name}</div>
+                        <div class="card-price">${p.price.toLocaleString()} сум</div>
+                    </div>
+                    <button class="add-btn" onclick="addToCart(${p.id})">В корзину</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-                    if (name && !isNaN(price)) {
-                        const card = document.createElement('div');
-                        card.className = 'product-card';
-                        card.innerHTML = `
-                            <img src="${img}" class="product-img" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
-                            <div class="product-name">${name}</div>
-                            <div class="product-price">${price.toLocaleString()} UZS</div>
-                            <button class="btn" onclick="addToCart('${name}', ${price})">Добавить</button>
-                        `;
-                        container.appendChild(card);
-                    }
-                }
-            });
-        } catch (e) {
-            console.error(e);
+    // --- 4. ЛОГИКА КОРЗИНЫ ---
+    window.addToCart = function(id) {
+        // Тактильная отдача (вибрация)
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+        if (!cart[id]) cart[id] = 0;
+        cart[id]++;
+
+        // Обновляем бейджик на товаре
+        const badge = document.getElementById(`badge-${id}`);
+        badge.style.display = 'flex';
+        badge.innerText = cart[id];
+
+        updateMainButton();
+    };
+
+    function updateMainButton() {
+        let totalSum = 0;
+        let totalCount = 0;
+
+        for (let id in cart) {
+            const p = products.find(pr => pr.id == id);
+            totalSum += p.price * cart[id];
+            totalCount += cart[id];
+        }
+
+        if (totalCount > 0) {
+            tg.MainButton.setText(`ОФОРМИТЬ: ${totalSum.toLocaleString()} сум`);
+            tg.MainButton.show();
+        } else {
+            tg.MainButton.hide();
         }
     }
 
-    function addToCart(name, price) {
-        cart.push({name, price});
-        totalPrice += price;
-        document.getElementById('total-price').innerText = totalPrice.toLocaleString();
-        document.getElementById('cart-btn').style.display = 'block';
-    }
+    // --- 5. ОТПРАВКА ЗАКАЗА БОТУ ---
+    Telegram.WebApp.onEvent('mainButtonClicked', function(){
+        let totalSum = 0;
+        let itemSummary = []; // Список названий для отчета
 
-    // Слушатель нажатия на кнопку корзины
-    document.getElementById('cart-btn').addEventListener('click', function() {
-        if (totalPrice > 0) {
-            const data = JSON.stringify({ total: totalPrice });
-            tg.sendData(data); // Отправляем данные в бота
+        for (let id in cart) {
+            const p = products.find(pr => pr.id == id);
+            totalSum += p.price * cart[id];
+            itemSummary.push(`${p.name} (x${cart[id]})`);
         }
+
+        // Формируем JSON именно так, как ждет shop_mode.py
+        const data = {
+            item: itemSummary.join(", "), // "Вода (x2), Кулер (x1)"
+            total: totalSum
+        };
+
+        tg.sendData(JSON.stringify(data));
     });
 
-    loadProducts();
+    // Запуск
+    initApp();
 </script>
 </body>
 </html>
