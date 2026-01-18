@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lidhub Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* --- VISUAL BOOST STYLES (Lidhub Premium) --- */
+        /* --- VISUAL BOOST STYLES (Lidhub Premium Design) --- */
         :root {
             --bg-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
             --card-bg: var(--tg-theme-bg-color, #ffffff);
@@ -62,7 +62,7 @@
             margin: 4px 0 0; 
             font-size: 13px; 
             color: var(--accent-color); 
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* Заголовок секции */
@@ -70,8 +70,9 @@
             padding: 0 20px;
             margin-bottom: 12px;
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -0.5px;
+            color: var(--text-color);
         }
 
         /* Сетка товаров */
@@ -93,6 +94,7 @@
             flex-direction: column;
             transition: transform 0.1s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .card:active {
@@ -108,6 +110,7 @@
             justify-content: center;
             padding: 10px;
             box-sizing: border-box;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
         }
 
         .card-img {
@@ -128,13 +131,17 @@
         .card-title { 
             font-size: 14px; 
             font-weight: 600; 
-            margin-bottom: 4px; 
+            margin-bottom: 6px; 
             line-height: 1.3;
-            min-height: 36px; /* Чтобы карточки были одной высоты */
+            min-height: 38px; /* Чтобы карточки были одной высоты */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .card-price { 
-            font-size: 15px; 
+            font-size: 16px; 
             color: var(--text-color); 
             font-weight: 800; 
             margin-bottom: 12px;
@@ -149,15 +156,13 @@
             border: none;
             border-radius: 10px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: opacity 0.2s;
             position: relative;
             overflow: hidden;
         }
         
-        .add-btn:active { opacity: 0.8; }
-
         /* Счетчик (Badge) */
         .badge {
             position: absolute;
@@ -166,9 +171,9 @@
             background: var(--danger);
             color: white;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 11px;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -178,7 +183,7 @@
             z-index: 10;
         }
 
-        /* Анимация появления */
+        /* Анимация появления бейджа */
         @keyframes popIn {
             0% { transform: scale(0); }
             80% { transform: scale(1.1); }
@@ -211,13 +216,12 @@
     const tg = window.Telegram.WebApp;
     tg.expand(); 
 
-    // --- БАЗА ДАННЫХ С ПРАВИЛЬНЫМИ ССЫЛКАМИ (RAW) ---
+    // --- БАЗА ДАННЫХ (UPDATED) ---
     const products = [
         { 
             id: 1, 
             name: "Вода AquaLid (19л)", 
             price: 15000, 
-            // Прямая ссылка на RAW файл
             img: "https://raw.githubusercontent.com/babayai/lidhub-shop/main/water.jpg" 
         },
         { 
@@ -230,8 +234,8 @@
             id: 3, 
             name: "Кулер Напольный", 
             price: 1250000, 
-            // Внимание: для кулера фото не было, пока стоит заглушка из интернета, чтобы не ломать дизайн
-            img: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+            // Ссылка обновлена
+            img: "https://raw.githubusercontent.com/babayai/lidhub-shop/main/cooler.jpg" 
         },
         { 
             id: 4, 
@@ -255,8 +259,12 @@
         
         // Настройка темы
         const theme = tg.themeParams;
-        if(theme.bg_color) document.documentElement.style.setProperty('--bg-color', theme.secondary_bg_color || '#f5f5f5');
-        if(theme.button_color) document.documentElement.style.setProperty('--accent-color', theme.button_color);
+        if(theme.bg_color) {
+            document.documentElement.style.setProperty('--bg-color', theme.secondary_bg_color || '#f5f5f5');
+        }
+        if(theme.button_color) {
+            document.documentElement.style.setProperty('--accent-color', theme.button_color);
+        }
 
         renderProducts();
         
@@ -293,9 +301,6 @@
         const badge = document.getElementById(`badge-${id}`);
         badge.classList.add('visible');
         badge.innerText = cart[id];
-
-        // Анимация кнопки при нажатии (визуальный отклик)
-        // В реальном проекте можно усложнить, но пока хватит Haptic + Badge
 
         updateMainButton();
     };
