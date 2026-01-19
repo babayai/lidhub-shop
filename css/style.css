@@ -1,0 +1,119 @@
+/* frontend/css/style.css */
+:root {
+    --bg-color: #000000;
+    --card-bg: #1C1C1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #8E8E93;
+    --accent-color: #007AFF; /* Lidhub Blue */
+    --danger-color: #FF453A;
+    --separator: #38383A;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: 80px; /* Отступ под кнопку Telegram */
+}
+
+.header {
+    text-align: center;
+    padding: 20px 0;
+    background: linear-gradient(180deg, rgba(28,28,30,1) 0%, rgba(0,0,0,0) 100%);
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+}
+
+.header span {
+    color: var(--accent-color);
+}
+
+.header p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.shop-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Две колонки */
+    gap: 12px;
+    padding: 16px;
+}
+
+.product-card {
+    background-color: var(--card-bg);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.1s;
+    border: 1px solid #2C2C2E;
+}
+
+.product-card:active {
+    transform: scale(0.98);
+}
+
+.product-img-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: #2C2C2E;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 10px;
+    margin-bottom: 10px;
+}
+
+.product-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.price {
+    font-size: 15px;
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.btn-add {
+    background-color: rgba(0, 122, 255, 0.15);
+    color: var(--accent-color);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-add:active {
+    background-color: rgba(0, 122, 255, 0.3);
+}
+
+/* Анимация добавления */
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.bump {
+    animation: pop 0.2s ease-out;
+}
